@@ -22,6 +22,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const getMonthKey = (year, month) => `${year}-${String(month + 1).padStart(2, '0')}`;
 
+    const formatMonthValue = (year, month) => `${year}-${String(month + 1).padStart(2, '0')}`;
+
+    const changeMonthValue = (value, delta) => {
+        const [year, month] = value.split('-').map(Number);
+        const date = new Date(year, month - 1, 1);
+        date.setMonth(date.getMonth() + delta);
+        return formatMonthValue(date.getFullYear(), date.getMonth());
+    };
+
     const formatDate = (date) => {
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -99,18 +108,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const userStorageKey = (user) => {
+        const key = String(user).replace(/[.#$\/\[\]]/g, (c) => `_${c.charCodeAt(0)}_`);
+        return key || '_empty_user_';
+    };
+
+    const getTotalCounts = (dateKey, shift) => {
+        return users.reduce((totals, user) => {
+            const storageKey = userStorageKey(user);
+            const key = `${dateKey}-${shift}`;
+            const status = presenceData[storageKey] ? presenceData[storageKey][key] : 'absent';
+            if (status === 'present') totals.present += 1;
+            if (status === 'maybe') totals.maybe += 1;
+            return totals;
+        }, { present: 0, maybe: 0 });
+    };
+
     const toggleCell = (e) => {
         const cell = e.target;
         const user = cell.dataset.user;
+        const storageUser = userStorageKey(user);
         const date = cell.dataset.date;
         const shift = cell.dataset.shift;
         const key = `${date}-${shift}`;
 
-        if (!presenceData[user]) {
-            presenceData[user] = {};
+        if (!presenceData[storageUser]) {
+            presenceData[storageUser] = {};
         }
 
-        let currentStatus = presenceData[user][key] || 'absent';
+        let currentStatus = presenceData[storageUser][key] || 'absent';
         let newStatus;
         switch (currentStatus) {
             case 'absent': newStatus = 'present'; break;
@@ -119,16 +145,39 @@ document.addEventListener('DOMContentLoaded', () => {
             default: newStatus = 'present';
         }
 
-        presenceData[user][key] = newStatus;
+        presenceData[storageUser][key] = newStatus;
         cell.className = `cell status-${newStatus}`;
         cell.textContent = getStatusSymbol(newStatus);
 
+        renderTable();
         savePresenceData();
+    };
+
+    const renderTotalRow = () => {
+        const row = document.createElement('tr');
+        row.className = 'total-row';
+        row.innerHTML = '<td class="user-column">Total présents</td>';
+
+        dates.forEach(date => {
+            const dateKey = formatDateKey(date);
+            const matinCounts = getTotalCounts(dateKey, 'matin');
+            const apresCounts = getTotalCounts(dateKey, 'apres');
+            const matinLabel = matinCounts.present + (matinCounts.maybe ? ` (${matinCounts.maybe})` : '');
+            const apresLabel = apresCounts.present + (apresCounts.maybe ? ` (${apresCounts.maybe})` : '');
+            row.innerHTML += `
+                <td class="total-cell">${matinLabel}</td>
+                <td class="total-cell">${apresLabel}</td>
+            `;
+        });
+
+        return row;
     };
 
     const renderTable = () => {
         renderHeader();
         tableBody.innerHTML = '';
+
+        tableBody.appendChild(renderTotalRow());
 
         users.forEach(user => {
             const row = document.createElement('tr');
@@ -139,12 +188,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const matinKey = `${dateKey}-matin`;
                 const apresKey = `${dateKey}-apres`;
 
-                if (!presenceData[user]) {
-                    presenceData[user] = {};
+                const storageKey = userStorageKey(user);
+                if (!presenceData[storageKey]) {
+                    presenceData[storageKey] = {};
                 }
 
-                const matinStatus = presenceData[user][matinKey] || 'absent';
-                const apresStatus = presenceData[user][apresKey] || 'absent';
+                const matinStatus = presenceData[storageKey][matinKey] || 'absent';
+                const apresStatus = presenceData[storageKey][apresKey] || 'absent';
 
                 row.innerHTML += `
                     <td class="cell status-${matinStatus}" data-user="${user}" data-date="${dateKey}" data-shift="matin">
@@ -158,6 +208,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             tableBody.appendChild(row);
         });
+
+        tableBody.appendChild(renderTotalRow());
 
         document.querySelectorAll('.cell').forEach(cell => {
             cell.addEventListener('click', toggleCell);
@@ -220,6 +272,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const onMonthChange = async () => {
         await updateSchedule();
     };
+
+    const prevMonthBtn = document.getElementById('prev-month-btn');
+    const nextMonthBtn = document.getElementById('next-month-btn');
+
+    prevMonthBtn.addEventListener('click', async () => {
+        monthPicker.value = changeMonthValue(monthPicker.value, -1);
+        await onMonthChange();
+    });
+
+    nextMonthBtn.addEventListener('click', async () => {
+        monthPicker.value = changeMonthValue(monthPicker.value, 1);
+        await onMonthChange();
+    });
 
     const initFirebase = () => {
         if (typeof firebase === 'undefined') {

@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const addUserBtn = document.getElementById('add-user-btn');
     const userList = document.getElementById('user-list');
     const adminMonthPicker = document.getElementById('admin-month-picker');
+    const adminPrevMonthBtn = document.getElementById('admin-prev-month-btn');
+    const adminNextMonthBtn = document.getElementById('admin-next-month-btn');
     const dateGrid = document.getElementById('date-grid');
     const refreshDatesBtn = document.getElementById('refresh-dates-btn');
 
@@ -29,6 +31,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const parseMonthValue = (value) => {
         const [year, month] = value.split('-').map(Number);
         return { year, month: month - 1 };
+    };
+
+    const formatMonthValue = (year, month) => `${year}-${String(month + 1).padStart(2, '0')}`;
+
+    const changeMonthValue = (value, delta) => {
+        const [year, month] = value.split('-').map(Number);
+        const date = new Date(year, month - 1, 1);
+        date.setMonth(date.getMonth() + delta);
+        return formatMonthValue(date.getFullYear(), date.getMonth());
     };
 
     const formatDateKey = (date) => {
@@ -117,7 +128,24 @@ document.addEventListener('DOMContentLoaded', () => {
         userList.innerHTML = '';
         users.forEach(user => {
             const li = document.createElement('li');
-            li.textContent = user;
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = user;
+
+            const editBtn = document.createElement('button');
+            editBtn.textContent = 'Modifier';
+            editBtn.addEventListener('click', async () => {
+                const newName = prompt('Modifier le nom de l\'utilisateur', user)?.trim();
+                if (!newName || newName === user) return;
+                if (users.includes(newName)) {
+                    alert('Ce nom existe déjà');
+                    return;
+                }
+                users = users.map(u => u === user ? newName : u);
+                users.sort();
+                await saveUsers();
+                renderUserList();
+            });
+
             const removeBtn = document.createElement('button');
             removeBtn.textContent = 'Supprimer';
             removeBtn.addEventListener('click', async () => {
@@ -125,7 +153,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 await saveUsers();
                 renderUserList();
             });
-            li.appendChild(removeBtn);
+
+            const actions = document.createElement('div');
+            actions.className = 'user-actions';
+            actions.appendChild(editBtn);
+            actions.appendChild(removeBtn);
+
+            li.appendChild(nameSpan);
+            li.appendChild(actions);
             userList.appendChild(li);
         });
     };
@@ -229,7 +264,19 @@ document.addEventListener('DOMContentLoaded', () => {
         renderDateGrid();
     });
 
-    adminMonthPicker.addEventListener('change', renderDateGrid);
+    adminPrevMonthBtn.addEventListener('click', async () => {
+        adminMonthPicker.value = changeMonthValue(adminMonthPicker.value, -1);
+        await renderDateGrid();
+    });
+
+    adminNextMonthBtn.addEventListener('click', async () => {
+        adminMonthPicker.value = changeMonthValue(adminMonthPicker.value, 1);
+        await renderDateGrid();
+    });
+
+    adminMonthPicker.addEventListener('change', async () => {
+        await renderDateGrid();
+    });
 
     initFirebase();
 });

@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminPrevMonthBtn = document.getElementById('admin-prev-month-btn');
     const adminNextMonthBtn = document.getElementById('admin-next-month-btn');
     const dateGrid = document.getElementById('date-grid');
-    const refreshDatesBtn = document.getElementById('refresh-dates-btn');
 
     let users = [];
     let datesByMonth = {};
@@ -257,11 +256,6 @@ document.addEventListener('DOMContentLoaded', () => {
             renderUserList();
             newUserInput.value = '';
         }
-    });
-
-    refreshDatesBtn.addEventListener('click', async () => {
-        await loadDatesByMonth();
-        renderDateGrid();
     });
 
     adminPrevMonthBtn.addEventListener('click', async () => {

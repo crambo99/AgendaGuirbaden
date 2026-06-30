@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let header2Html = '<th class="user-column"></th>';
         dates.forEach(() => {
-            header2Html += '<th class="shift-header">Matin</th><th class="shift-header">Après</th>';
+            header2Html += '<th class="shift-header">Matin</th><th class="shift-header">Après<br/>Midi</th>';
         });
         headerRow2.innerHTML = header2Html;
     };
@@ -154,9 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderTotalRow = () => {
-        const row = document.createElement('tr');
-        row.className = 'total-row';
-        row.innerHTML = '<td class="user-column">Total présents</td>';
+        let html = '<th class="user-column">Total présents</th>';
 
         dates.forEach(date => {
             const dateKey = formatDateKey(date);
@@ -164,20 +162,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const apresCounts = getTotalCounts(dateKey, 'apres');
             const matinLabel = matinCounts.present + (matinCounts.maybe ? ` (${matinCounts.maybe})` : '');
             const apresLabel = apresCounts.present + (apresCounts.maybe ? ` (${apresCounts.maybe})` : '');
-            row.innerHTML += `
-                <td class="total-cell">${matinLabel}</td>
-                <td class="total-cell">${apresLabel}</td>
+            html += `
+                <th class="total-cell">${matinLabel}</th>
+                <th class="total-cell">${apresLabel}</th>
             `;
         });
 
-        return row;
+        return html;
     };
 
     const renderTable = () => {
         renderHeader();
+        document.getElementById('header-row-3').innerHTML = renderTotalRow();
         tableBody.innerHTML = '';
-
-        tableBody.appendChild(renderTotalRow());
 
         users.forEach(user => {
             const row = document.createElement('tr');
@@ -208,8 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             tableBody.appendChild(row);
         });
-
-        tableBody.appendChild(renderTotalRow());
 
         document.querySelectorAll('.cell').forEach(cell => {
             cell.addEventListener('click', toggleCell);

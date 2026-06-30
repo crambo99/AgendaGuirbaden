@@ -1,0 +1,167 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+#sync-status {
+    text-align: center;
+    display: block;
+    margin-bottom: 15px;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+#user-input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+button {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#download-btn {
+    background-color: #2196F3;
+}
+
+#download-btn:hover {
+    background-color: #0b7dda;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+}
+
+thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+th {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 10px 5px;
+    font-weight: bold;
+    text-align: center;
+    font-size: 12px;
+}
+
+th.user-column {
+    background-color: #e8f5e9;
+    font-weight: bold;
+    min-width: 120px;
+}
+
+th.date-header {
+    background-color: #e3f2fd;
+    padding: 5px;
+}
+
+.date-info {
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.date-info small {
+    display: block;
+    font-weight: normal;
+    font-size: 11px;
+    color: #666;
+}
+
+th.shift-header {
+    background-color: #f0f0f0;
+    font-size: 11px;
+    padding: 8px 3px;
+    min-width: 40px;
+}
+
+td {
+    border: 1px solid #ddd;
+    padding: 10px 5px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+td.user-name {
+    background-color: #f5f5f5;
+    text-align: left;
+    font-weight: bold;
+    min-width: 120px;
+    position: sticky;
+    left: 0;
+    z-index: 5;
+}
+
+td.cell {
+    cursor: pointer;
+    min-width: 45px;
+    transition: background-color 0.2s;
+}
+
+td.cell.status-present {
+    background-color: #a0f0a0;
+    color: #2e7d32;
+}
+
+td.cell.status-absent {
+    background-color: #f0a0a0;
+    color: #c62828;
+}
+
+td.cell.status-maybe {
+    background-color: #fff9c4;
+    color: #f57f17;
+}
+
+td.cell:hover {
+    opacity: 0.8;
+}

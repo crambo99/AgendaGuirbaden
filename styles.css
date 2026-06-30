@@ -59,12 +59,111 @@ button:hover {
     background-color: #45a049;
 }
 
-#download-btn {
-    background-color: #2196F3;
+.admin-link {
+    display: inline-block;
+    margin-left: auto;
+    padding: 8px 16px;
+    background-color: #1976d2;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
 }
 
-#download-btn:hover {
-    background-color: #0b7dda;
+.admin-link:hover {
+    background-color: #135ba1;
+}
+
+.admin-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.admin-controls h2 {
+    margin-bottom: 10px;
+}
+
+#user-list,
+#date-list {
+    list-style: none;
+    margin-top: 10px;
+}
+
+#user-list li,
+#date-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    background-color: #fafafa;
+}
+
+#new-user-input,
+#new-date-input,
+#admin-month-picker {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.date-controls {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+}
+
+.date-grid {
+    margin-top: 16px;
+    display: grid;
+    gap: 4px;
+}
+
+.date-row {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+}
+
+.date-item,
+.date-item-header,
+.date-item-empty {
+    padding: 10px 8px;
+    border: 1px solid #ddd;
+    background-color: #fafafa;
+    text-align: center;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.date-item-header {
+    background-color: #e3f2fd;
+    font-weight: bold;
+    cursor: default;
+}
+
+.date-item-empty {
+    background-color: transparent;
+    border-color: transparent;
+    cursor: default;
+}
+
+.date-item.selected {
+    background-color: #c8e6c9;
+    border-color: #4caf50;
+}
+
+.date-item:hover:not(.selected):not(.date-item-header):not(.date-item-empty) {
+    background-color: #f1f8e9;
 }
 
 .table-wrapper {

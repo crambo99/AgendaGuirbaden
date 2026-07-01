@@ -36,6 +36,26 @@ h1 {
     gap: 10px;
     margin-bottom: 20px;
     flex-wrap: wrap;
+    align-items: center;
+}
+
+.add-user-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-left: auto;
+}
+
+.add-user-controls input {
+    min-width: 180px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.add-user-controls button {
+    padding: 8px 12px;
 }
 
 #user-input {
@@ -315,6 +335,24 @@ td.cell {
     cursor: pointer;
     min-width: 45px;
     transition: background-color 0.2s;
+}
+
+td.cell.locked {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+td.user-name.selectable {
+    cursor: pointer;
+}
+
+td.user-name.selected-user {
+    background-color: #c8e6c9;
+    color: #2e7d32;
+}
+
+tr.selected-row td {
+    border-color: #4caf50;
 }
 
 td.cell.status-present {

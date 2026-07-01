@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const editBtn = document.createElement('button');
             editBtn.textContent = 'Modifier';
             editBtn.addEventListener('click', async () => {
-                const newName = prompt('Modifier le nom de l\'utilisateur', user)?.trim();
+                const newName = prompt('Modifier le nom du bénévole', user)?.trim();
                 if (!newName || newName === user) return;
                 if (users.includes(newName)) {
                     alert('Ce nom existe déjà');

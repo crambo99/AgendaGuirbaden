@@ -4,11 +4,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const headerRow2 = document.getElementById('header-row-2');
     const tableBody = document.getElementById('table-body');
     const monthPicker = document.getElementById('month-picker');
+    const newUserInput = document.getElementById('new-user-input');
+    const addUserBtn = document.getElementById('add-user-btn');
 
     let presenceData = {};
     let users = [];
     let dates = [];
     let database = null;
+    let selectedUser = null;
 
     const firebaseConfig = {
         apiKey: "AIzaSyBHT1mdJvnJxq7lf5jw3uvyODD0cbG8Oxc",
@@ -80,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderHeader = () => {
-        let header1Html = '<th class="user-column">Utilisateurs</th>';
+        let header1Html = '<th class="user-column">Bénévoles</th>';
         dates.forEach(date => {
             const dateDisplay = formatDate(date);
             const dayName = getDayName(date);
@@ -127,6 +130,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleCell = (e) => {
         const cell = e.target;
         const user = cell.dataset.user;
+        if (selectedUser !== user) {
+            return;
+        }
+
         const storageUser = userStorageKey(user);
         const date = cell.dataset.date;
         const shift = cell.dataset.shift;
@@ -171,14 +178,58 @@ document.addEventListener('DOMContentLoaded', () => {
         return html;
     };
 
+    const addUser = async () => {
+        if (!newUserInput) return;
+
+        const value = newUserInput.value.trim();
+        if (!value) return;
+
+        if (users.includes(value)) {
+            selectedUser = value;
+            newUserInput.value = '';
+            renderTable();
+            return;
+        }
+
+        users.push(value);
+        users.sort();
+        selectedUser = value;
+        newUserInput.value = '';
+
+        try {
+            await firebase.database().ref('users').set(users);
+            renderTable();
+            syncStatus.textContent = 'Bénévole ajouté ✓';
+            syncStatus.style.color = 'green';
+        } catch (error) {
+            console.error('Erreur lors de l\'ajout du bénévole:', error);
+            syncStatus.textContent = 'Erreur d\'ajout';
+            syncStatus.style.color = 'red';
+        }
+    };
+
     const renderTable = () => {
+        if (selectedUser && !users.includes(selectedUser)) {
+            selectedUser = null;
+        }
+
         renderHeader();
         document.getElementById('header-row-3').innerHTML = renderTotalRow();
         tableBody.innerHTML = '';
 
         users.forEach(user => {
             const row = document.createElement('tr');
-            row.innerHTML = `<td class="user-name">${user}</td>`;
+            row.className = selectedUser === user ? 'selected-row' : 'locked-row';
+
+            const nameCell = document.createElement('td');
+            nameCell.className = `user-name ${selectedUser === user ? 'selected-user' : 'selectable'}`;
+            nameCell.textContent = user;
+            nameCell.dataset.user = user;
+            nameCell.addEventListener('click', () => {
+                selectedUser = selectedUser === user ? null : user;
+                renderTable();
+            });
+            row.appendChild(nameCell);
 
             dates.forEach(date => {
                 const dateKey = formatDateKey(date);
@@ -193,21 +244,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 const matinStatus = presenceData[storageKey][matinKey] || 'absent';
                 const apresStatus = presenceData[storageKey][apresKey] || 'absent';
 
-                row.innerHTML += `
-                    <td class="cell status-${matinStatus}" data-user="${user}" data-date="${dateKey}" data-shift="matin">
-                        ${getStatusSymbol(matinStatus)}
-                    </td>
-                    <td class="cell status-${apresStatus}" data-user="${user}" data-date="${dateKey}" data-shift="apres">
-                        ${getStatusSymbol(apresStatus)}
-                    </td>
-                `;
+                const matinCell = document.createElement('td');
+                matinCell.className = `cell status-${matinStatus}${selectedUser === user ? '' : ' locked'}`;
+                matinCell.dataset.user = user;
+                matinCell.dataset.date = dateKey;
+                matinCell.dataset.shift = 'matin';
+                matinCell.textContent = getStatusSymbol(matinStatus);
+                if (selectedUser === user) {
+                    matinCell.addEventListener('click', toggleCell);
+                }
+                row.appendChild(matinCell);
+
+                const apresCell = document.createElement('td');
+                apresCell.className = `cell status-${apresStatus}${selectedUser === user ? '' : ' locked'}`;
+                apresCell.dataset.user = user;
+                apresCell.dataset.date = dateKey;
+                apresCell.dataset.shift = 'apres';
+                apresCell.textContent = getStatusSymbol(apresStatus);
+                if (selectedUser === user) {
+                    apresCell.addEventListener('click', toggleCell);
+                }
+                row.appendChild(apresCell);
             });
 
             tableBody.appendChild(row);
-        });
-
-        document.querySelectorAll('.cell').forEach(cell => {
-            cell.addEventListener('click', toggleCell);
         });
     };
 
@@ -309,6 +369,24 @@ document.addEventListener('DOMContentLoaded', () => {
             syncStatus.style.color = 'red';
         }
     };
+
+    if (newUserInput) {
+        newUserInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                addUser();
+            }
+        });
+        newUserInput.addEventListener('blur', () => {
+            if (newUserInput.value.trim()) {
+                addUser();
+            }
+        });
+    }
+
+    if (addUserBtn) {
+        addUserBtn.addEventListener('click', addUser);
+    }
 
     monthPicker.addEventListener('change', onMonthChange);
     monthPicker.value = getCurrentMonthValue();
